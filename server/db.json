@@ -1,0 +1,92 @@
+{
+  "elements": [
+    {
+      "updateTime": "2022-08-26 14:33",
+      "elements": [
+        {
+          "id": 0,
+          "top": 0,
+          "left": 0,
+          "key": "video",
+          "label": "视频",
+          "focus": false,
+          "width": 1348,
+          "height": 760,
+          "zIndex": 0,
+          "fontSize": 14,
+          "color": "#333",
+          "zoom": 100,
+          "revolve": 0,
+          "video": "http://baobab.kaiyanapp.com/api/v1/playUrl?vid=313305&resourceType=video&editionType=default&source=aliyun&playUrlType=url_oss&udid=",
+          "autoplay": true,
+          "loop": true,
+          "muted": true,
+          "event": ""
+        },
+        {
+          "id": 1,
+          "top": 329,
+          "left": 777.5,
+          "key": "btn",
+          "label": "搜索",
+          "focus": true,
+          "width": 60,
+          "height": 32,
+          "zIndex": 0,
+          "fontSize": 14,
+          "zoom": 100,
+          "revolve": 0,
+          "fontFamily": "sans-serif",
+          "color": "#606266",
+          "borderRadius": 5,
+          "event": "click(href(https://www.baidu.com/s?ie=UTF-8&wd={input-2.value}))"
+        },
+        {
+          "id": 2,
+          "top": 329,
+          "left": 559.5,
+          "key": "input",
+          "label": "百度一下，你就知道",
+          "value": "",
+          "focus": false,
+          "width": 180,
+          "height": 32,
+          "zIndex": 0,
+          "fontSize": 14,
+          "color": "#333",
+          "zoom": 100,
+          "revolve": 0,
+          "inputType": "",
+          "borderRadius": 5,
+          "event": ""
+        },
+        {
+          "id": 3,
+          "top": 169,
+          "left": 603,
+          "key": "image",
+          "label": "图片",
+          "focus": false,
+          "width": 192,
+          "height": 108,
+          "zIndex": 0,
+          "fontSize": 14,
+          "color": "#333",
+          "borderRadius": 0,
+          "zoom": 100,
+          "revolve": 0,
+          "img": "https://s2.loli.net/2022/08/26/wWx6h8QgjmUVbfD.png",
+          "event": ""
+        }
+      ],
+      "canvas": {
+        "$id": "canvas",
+        "bgColor": "#fff",
+        "width": 1348,
+        "height": 620,
+        "_isOptionsAPI": true
+      },
+      "id": 1
+    }
+  ]
+}
