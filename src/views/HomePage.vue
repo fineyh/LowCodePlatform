@@ -22,6 +22,8 @@
                 </el-button-group>
                 <div class="divider"></div>
                 <el-button-group>
+                  <el-button @click="editCode">编辑代码</el-button>
+<!--                  <el-button @click="importCode">导入</el-button>-->
                     <el-button @click="exportCode">导出</el-button>
                     <el-button @click="showPublishDialog">发布</el-button>
                 </el-button-group>
@@ -50,6 +52,22 @@
                 </el-aside>
             </el-container>
         </el-container>
+<!--      编辑代码-->
+      <el-dialog custom-class="edit-code-dialog" v-model="editCodeDialog" title="编辑代码" width="40%" top="calc(4vh + 20px)">
+        <el-scrollbar class="code-editor">
+          <el-input
+              type="textarea"
+              :rows="18"
+              placeholder="请输入代码"
+              class="code-textarea"
+          v-model="editedCode">
+          </el-input>
+        </el-scrollbar>
+        <div slot="footer" class="dialog-footer" style="margin-top: 20px; text-align: right">
+          <el-button @click="cancelEdit">取消</el-button>
+          <el-button type="primary" @click="saveEdit">保存</el-button>
+        </div>
+      </el-dialog>
         <!-- 预览对话框 -->
         <el-dialog custom-class="preview-dialog" v-model="previewDialog" width="80%" top="calc(4vh + 20px)">
             <template #header="{ titleId }">
@@ -109,7 +127,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, Ref, ref, WritableComputedRef } from 'vue'
+import {computed, onMounted, reactive, Ref, ref, watch, WritableComputedRef} from 'vue'
 import { useElementsStore, usePublishStore, useCanvasStore } from '@/store'
 import { useDark, useToggle } from '@vueuse/core'
 import { screenshots } from '@/utils/screenshots'
@@ -168,6 +186,71 @@ let { undo, redo, deleteElement, clearCanvas } = state.commands
 
 // 显示预览窗口
 let previewDialog: Ref<boolean> = ref(false)
+
+
+// 显示编辑代码
+let editCodeDialog: Ref<boolean> = ref(false)
+const elementsStore = useElementsStore();
+
+// 创建一个响应式引用来存储elements的初始内容
+const initialCode = ref();
+
+// 创建一个响应式引用来存储elements的内容
+const editedCode = ref();
+
+// 当组件挂载时，初始化editedCode的值
+onMounted(() => {
+  initialCode.value = JSON.stringify(elementsStore.elements, null, 2);
+  editedCode.value = initialCode.value;
+});
+
+// 监听store中elements的变化，并更新editedCode的值
+watch(() => elementsStore.elements, (newValue) => {
+  editedCode.value = JSON.stringify(newValue, null, 2);
+});
+
+// 取消编辑的方法
+const cancelEdit = () => {
+  // 恢复textarea到初始状态
+  editedCode.value = initialCode.value;
+  // 关闭对话框
+  editCodeDialog.value = false;
+  // 可以添加提示用户取消编辑的逻辑
+  console.log('编辑已取消！');
+  ElMessage({
+    message: '取消编辑',
+  })
+};
+
+// saveEdit 方法，保存编辑后的代码到 Pinia store
+const saveEdit = () => {
+  try {
+    // 尝试解析编辑后的代码为 JSON 对象
+    const parsedElements = JSON.parse(editedCode.value);
+    // 更新 Pinia store 中的 elements
+    elementsStore.updateElements(parsedElements);
+    // 关闭对话框
+    editCodeDialog.value = false;
+    console.log('代码保存成功！');
+    ElMessage({
+      type: 'success',
+      message: '保存成功',
+    })
+  } catch (error) {
+    // 解析 JSON 失败时的处理逻辑
+    console.error('代码解析失败:', error);
+    ElMessage({
+      type: 'error',
+      message: '保存失败',
+    })
+  }
+};
+
+// 显示编辑对话框
+const editCode: VoidF = () => {
+  editCodeDialog.value = true
+}
+
 
 // 显示帮助窗口
 let helpDialog: Ref<boolean> = ref(false)
@@ -241,7 +324,7 @@ const selectPage: Function = (row: any) => {
 
 // 复制网址
 const copyUrl: (url: string) => void = (url: string) => {
-    navigator.clipboard.writeText(url)    
+    navigator.clipboard.writeText(url)
     ElMessage({
         type: 'success',
         message: '复制成功',
@@ -293,6 +376,8 @@ const submitPublish: VoidF = () => {
         })
     }
 }
+
+
 
 </script>
 

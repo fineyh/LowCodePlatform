@@ -48,5 +48,6 @@ export type ElementsStore = Store<'elements',
         chooseAll(): void,
         updateCode(id: number, code: string): void,
         processString(paramStr: string): string
+        updateElements(newElements)
     }
 >

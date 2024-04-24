@@ -3,7 +3,7 @@ import type { ElementItem, ElementsStore } from "@/interface"
 import { deepcopy } from '@/utils/deepcopy'
 import $ from 'jquery'
 
-export const useElementsStore: () => ElementsStore = defineStore('elements', {  
+export const useElementsStore: () => ElementsStore = defineStore('elements', {
     state: () => {
         return {
             sum: 0,
@@ -104,6 +104,9 @@ export const useElementsStore: () => ElementsStore = defineStore('elements', {
                 res += this.elements.filter(item => item.id == sub[1])[0][sub[2]]
             })
             return res
-        }
+        },
+        updateElements(newElements) {
+            this.elements = newElements;
+        },
     }
 })
