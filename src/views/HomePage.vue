@@ -136,17 +136,33 @@
       <!-- AI 对话框 -->
       <el-dialog custom-class="ai-dialog" v-model="aiDialogVisible" title="AI" width="50%" top="calc(4vh + 20px)">
         <el-scrollbar class="ai-dialog-content">
-          <!-- 显示区域 -->
-          <div class="display-area" >{{ aiResponse }}</div>
-          <!-- 输入区域 -->
-          <el-input type="textarea" v-model="aiInput" placeholder="请输入内容"></el-input>
+          <!-- 消息列表 -->
+          <div v-if="aiDialogContent.length === 0" class="welcome-message">
+            <h2>你好，我能为你做什么？</h2>
+          </div>
+          <div v-else>
+            <!-- 消息列表 -->
+            <div v-for="(message, index) in aiDialogContent" :key="index" class="message" :class="{ 'user-message': message.role === 'user', 'ai-message': message.role === 'AI' }">
+              <!-- 判断是否为 AI 回答，是的话添加 ai-answer 类 -->
+              <div v-if="message.role === 'AI'" class="ai-answer-container" @click="copyToClipboard(message.content)">
+                <div class="ai-answer">{{ message.content }}</div>
+              </div>
+              <!-- 否则直接显示文本 -->
+              <div v-else class="user-question-container">
+                <div class="user-question">{{ message.content }}</div>
+              </div>
+            </div>
+          </div>
         </el-scrollbar>
-        <div slot="footer" class="dialog-footer" style="margin-top: 20px; text-align: right">
-          <el-button @click="cancelAI">取消</el-button>
-          <el-button type="primary" @click="sendToAI">确认</el-button>
+
+        <!-- 输入框和发送按钮 -->
+        <div class="input-container">
+          <el-input type="textarea" v-model="aiInput" placeholder="请输入内容"></el-input>
+          <div class="send-button">
+            <el-button type="primary" @click="sendToAI">确认</el-button>
+          </div>
         </div>
       </el-dialog>
-
     </div>
 </template>
 
@@ -159,10 +175,11 @@ import { ComponentList, EditCanvas, ConfigMenu, ShowCanvas } from '@/components'
 import { registerCommand } from '@/utils/registerCommand'
 import type { CanvasStore, ElementsStore, PublishStore, State, VoidF } from "@/interface"
 import emitter from '@/utils/bus'
-import { Upload, InfoFilled } from "@element-plus/icons-vue"
+import { Upload, InfoFilled, Promotion } from "@element-plus/icons-vue"
 import { getCode, downloadCode } from '@/utils/useExport'
 import { deleteRequest, getRequest, postRequest, putRequest } from '@/http'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import axios from "axios";
 
 // 获取画布元素列表
 let elements: ElementsStore = useElementsStore()
@@ -443,13 +460,51 @@ const openAIDialog = () => {
   aiDialogVisible.value = true;
 };
 
-// 方法：取消AI对话框
-const cancelAI = () => {
-  aiDialogVisible.value = false;
+const aiDialogContent: { role: string; content: string }[] = reactive([]);
+
+// 方法：发送请求至AI
+const sendToAI: VoidF = async () => {
+  const userInput = aiInput.value; // 获取用户输入的内容
+  if (!userInput.trim()) return; // 如果输入为空则不发送请求
+
+  // 构造请求参数
+  const requestData = {
+    "messages": [
+      {
+        "role": "user",
+        "content": userInput
+      }
+    ],
+    "temperature": 0.95,
+    "top_p": 0.8,
+    "penalty_score": 1,
+    "disable_search": false,
+    "enable_citation": false,
+    "response_format": "text"
+  };
+
+  try {
+    // 发送请求
+    const response = await axios.post('https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions?access_token=24.c65ced2d52aef0aab677bca89fed88f1.2592000.1716711293.282335-64016530', requestData);
+
+    // 更新显示区域的内容
+    aiDialogContent.push({ role: 'user', content: userInput }); // 用户输入的内容
+    aiDialogContent.push({ role: 'AI', content: response.data.result }); // AI 的回复
+    aiResponse.value = response.data.result; // 只显示 AI 的回复
+    console.log(response.data); // 在控制台保留 API 返回的信息
+  } catch (error) {
+    console.error(error);
+    aiResponse.value = '请求处理时出错。'; // 处理错误
+  }
+
+  // 清空输入框的内容
   aiInput.value = '';
-  aiResponse.value = '';
 };
 
+//复制回答
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text)
+}
 
 </script>
 
@@ -529,8 +584,53 @@ const cancelAI = () => {
     }
 }
 
-.display-area {
-  height: 200px; /* 设置固定的高度 */
+.ai-dialog-content {
+  height: 300px; /* 设置固定的高度 */
   overflow-y: auto; /* 添加垂直滚动条 */
 }
+
+.input-container {
+  display: flex;
+  align-items: center;
+
+  .el-input {
+    flex: 1; /* 输入框自动填充剩余空间 */
+  }
+
+  .send-button {
+    margin-left: 10px; /* 给按钮一个左边距 */
+  }
+}
+
+.welcome-message {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.welcome-message h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.ai-answer-container {
+  margin: 10px 0; /* 为 AI 回答添加上下间距 */
+  background-color: #E6F7FF; /* 设置 AI 回答的背景色 */
+  border-radius: 8px; /* 设置 AI 回答的边框圆角 */
+  padding: 10px; /* 设置 AI 回答的内边距 */
+  cursor: pointer; /* 将鼠标指针设置为手型 */
+  transition: background-color 0.3s; /* 添加颜色变化的过渡效果 */
+}
+
+.ai-answer-container:hover {
+  background-color: #d6e4ff; /* 当光标悬停时，改变背景色 */
+}
+
+.user-question-container {
+  margin: 10px 0; /* 为用户问题添加上下间距 */
+  background-color: #e9feee; /* 设置用户问题的背景色 */
+  border-radius: 8px; /* 设置用户问题的边框圆角 */
+  padding: 10px; /* 设置用户问题的内边距 */
+}
+
 </style>
