@@ -21,9 +21,12 @@
                     <el-button @click="getShots">截图</el-button>
                 </el-button-group>
                 <div class="divider"></div>
+              <el-button-group>
+                <el-button title="AI" @click="openAIDialog">AI</el-button>
+                <el-button @click="editCode">编辑代码</el-button>
+              </el-button-group>
+              <div class="divider"></div>
                 <el-button-group>
-                  <el-button @click="editCode">编辑代码</el-button>
-<!--                  <el-button @click="importCode">导入</el-button>-->
                     <el-button @click="exportCode">导出</el-button>
                     <el-button @click="showPublishDialog">发布</el-button>
                 </el-button-group>
@@ -60,14 +63,21 @@
               :rows="18"
               placeholder="请输入代码"
               class="code-textarea"
-          v-model="editedCode">
-          </el-input>
+              v-model="editedCode"
+          ></el-input>
         </el-scrollbar>
         <div slot="footer" class="dialog-footer" style="margin-top: 20px; text-align: right">
+          <!-- 添加导入按钮 -->
+          <el-button type="warning" @click="importFile">导入JSON</el-button>
+          <!-- 添加导出按钮 -->
+          <el-button type="warning" @click="exportToFile">导出JSON</el-button>
           <el-button @click="cancelEdit">取消</el-button>
           <el-button type="primary" @click="saveEdit">保存</el-button>
         </div>
+        <!-- 用于文件选择的输入元素（隐藏的） -->
+        <input type="file" ref="fileInput" style="display: none" accept=".json" @change="handleFileUpload">
       </el-dialog>
+
         <!-- 预览对话框 -->
         <el-dialog custom-class="preview-dialog" v-model="previewDialog" width="80%" top="calc(4vh + 20px)">
             <template #header="{ titleId }">
@@ -123,6 +133,20 @@
                 </template>
             </el-input>
         </el-dialog>
+      <!-- AI 对话框 -->
+      <el-dialog custom-class="ai-dialog" v-model="aiDialogVisible" title="AI" width="50%" top="calc(4vh + 20px)">
+        <el-scrollbar class="ai-dialog-content">
+          <!-- 显示区域 -->
+          <div class="display-area" >{{ aiResponse }}</div>
+          <!-- 输入区域 -->
+          <el-input type="textarea" v-model="aiInput" placeholder="请输入内容"></el-input>
+        </el-scrollbar>
+        <div slot="footer" class="dialog-footer" style="margin-top: 20px; text-align: right">
+          <el-button @click="cancelAI">取消</el-button>
+          <el-button type="primary" @click="sendToAI">确认</el-button>
+        </div>
+      </el-dialog>
+
     </div>
 </template>
 
@@ -251,6 +275,38 @@ const editCode: VoidF = () => {
   editCodeDialog.value = true
 }
 
+//导入JSON
+const fileInput = ref(null)
+
+const importFile = () => {
+  fileInput.value.click()
+}
+
+const handleFileUpload = (event) => {
+  const file = event.target.files[0]
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    if (reader.result) {
+      editedCode.value = reader.result as string
+    }
+  }
+  reader.readAsText(file)
+}
+
+//导出JSON
+const exportToFile = () => {
+  const jsonData = editedCode.value
+  const blob = new Blob([jsonData], { type: 'application/json' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'exported_data.json'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  window.URL.revokeObjectURL(url)
+}
 
 // 显示帮助窗口
 let helpDialog: Ref<boolean> = ref(false)
@@ -377,6 +433,22 @@ const submitPublish: VoidF = () => {
     }
 }
 
+// 定义响应式引用来控制AI对话框的可见性、输入和响应
+let aiDialogVisible = ref(false);
+let aiInput = ref('');
+let aiResponse = ref('');
+
+// 方法：打开AI对话框
+const openAIDialog = () => {
+  aiDialogVisible.value = true;
+};
+
+// 方法：取消AI对话框
+const cancelAI = () => {
+  aiDialogVisible.value = false;
+  aiInput.value = '';
+  aiResponse.value = '';
+};
 
 
 </script>
@@ -455,5 +527,10 @@ const submitPublish: VoidF = () => {
     .el-input {
         margin-top: 20px;
     }
+}
+
+.display-area {
+  height: 200px; /* 设置固定的高度 */
+  overflow-y: auto; /* 添加垂直滚动条 */
 }
 </style>
