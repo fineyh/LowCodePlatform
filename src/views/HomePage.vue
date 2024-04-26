@@ -134,7 +134,7 @@
             </el-input>
         </el-dialog>
       <!-- AI 对话框 -->
-      <el-dialog custom-class="ai-dialog" v-model="aiDialogVisible" title="AI" width="50%" top="calc(4vh + 20px)">
+      <el-dialog custom-class="ai-dialog" v-model="aiDialogVisible" title="LowCode GPT" width="50%" top="calc(4vh + 20px)">
         <el-scrollbar class="ai-dialog-content">
           <!-- 消息列表 -->
           <div v-if="aiDialogContent.length === 0" class="welcome-message">
@@ -157,9 +157,9 @@
 
         <!-- 输入框和发送按钮 -->
         <div class="input-container">
-          <el-input type="textarea" v-model="aiInput" placeholder="请输入内容"></el-input>
+          <el-input type="textarea" v-model="aiInput" placeholder="请输入需求"></el-input>
           <div class="send-button">
-            <el-button type="primary" @click="sendToAI">确认</el-button>
+            <el-button type="primary" @click="sendToAI" :icon="Promotion" circle></el-button>
           </div>
         </div>
       </el-dialog>
