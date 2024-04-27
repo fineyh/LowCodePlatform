@@ -386,7 +386,7 @@ export default defineComponent({
         // 事件属性
         let eventListen: Ref<string> = ref('click')
         let eventAction: Ref<string> = ref('href')
-        let eventContent: Ref<string> = ref('https://juejin.cn/')
+        let eventContent: Ref<string> = ref('https://www.nuist.edu.cn/main.htm')
         let eventCode: Ref<string> = ref(elements.elements[focusId.value] ? elements.elements[focusId.value].event : '')
 
         // 添加事件

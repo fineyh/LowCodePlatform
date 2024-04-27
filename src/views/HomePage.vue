@@ -22,7 +22,7 @@
                 </el-button-group>
                 <div class="divider"></div>
               <el-button-group>
-                <el-button title="AI" @click="openAIDialog">AI</el-button>
+                <el-button title="AI" @click="openAIDialog" class="ai-button">AI</el-button>
                 <el-button @click="editCode">编辑代码</el-button>
               </el-button-group>
               <div class="divider"></div>
@@ -144,7 +144,7 @@
             <!-- 消息列表 -->
             <div v-for="(message, index) in aiDialogContent" :key="index" class="message" :class="{ 'user-message': message.role === 'user', 'ai-message': message.role === 'AI' }">
               <!-- 判断是否为 AI 回答，是的话添加 ai-answer 类 -->
-              <div v-if="message.role === 'AI'" class="ai-answer-container" @click="copyToClipboard(message.content)">
+              <div v-if="message.role === 'AI'" class="ai-answer-container" @click="copyToClipboard(message.content)" @dblclick="saveToPinia(message.content)">>
                 <div class="ai-answer">{{ message.content }}</div>
               </div>
               <!-- 否则直接显示文本 -->
@@ -456,7 +456,7 @@ let aiInput = ref('');
 let aiResponse = ref('');
 
 // 方法：打开AI对话框
-const openAIDialog = () => {
+const openAIDialog: VoidF = async () => {
   aiDialogVisible.value = true;
 };
 
@@ -475,6 +475,7 @@ const sendToAI: VoidF = async () => {
         "content": userInput
       }
     ],
+    "system": (await axios.get('/prompt.md')).data,
     "temperature": 0.95,
     "top_p": 0.8,
     "penalty_score": 1,
@@ -505,6 +506,30 @@ const sendToAI: VoidF = async () => {
 const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text)
 }
+
+// 双击直接保存
+const saveToPinia = (content) => {
+  try {
+    // 尝试解析 AI 回答的内容为 JSON 对象
+    const parsedContent = JSON.parse(content);
+    // 更新 Pinia store 中的内容
+    elementsStore.updateElements(parsedContent);
+    ElMessage({
+      type: 'success',
+      message: '绘制成功',
+    });
+    console.log('AI 回答内容保存成功！');
+    // 如果需要，可以添加一条提示消息表示保存成功
+  } catch (error) {
+    ElMessage({
+      type: 'error',
+      message: '绘制失败',
+    });
+    console.error('解析 AI 回答内容时出错：', error);
+    // 如果需要，可以添加一条提示消息表示保存失败
+  }
+  aiDialogVisible.value = false;
+};
 
 </script>
 
@@ -633,4 +658,28 @@ const copyToClipboard = (text: string) => {
   padding: 10px; /* 设置用户问题的内边距 */
 }
 
+.ai-button {
+  font-weight: bold; /* 加粗 */
+  font-family: "Cooper Black"; /* 使用艺术字体 */
+
+  /* 彩虹色动画 */
+  background-image: linear-gradient(to right, violet, indigo, blue, green, yellow, orange, red);
+  background-size: 200% auto;
+  color: transparent;
+  //background-clip: text;
+  -webkit-background-clip: text;
+  animation: rainbow-text 5s linear infinite;
+}
+
+@keyframes rainbow-text {
+  0% {
+    background-position: 0 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
 </style>
