@@ -72,7 +72,7 @@
     "borderRadius": 0,
     "zoom": 100,
     "revolve": 0,
-    "img": "https://www.pics.fineyh.com/images/2022/08/20/202208201641833.png",
+    "img": "img.png",
     "event": ""
   },
   {

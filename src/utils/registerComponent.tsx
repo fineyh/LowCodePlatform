@@ -99,7 +99,7 @@ registry.register({
     borderRadius: 0,
     zoom:100,
     revolve:0,
-    img: "https://gimg3.baidu.com/search/src=http%3A%2F%2Fgips2.baidu.com%2Fit%2Fu%3D3426861169%2C1209499456%26fm%3D3030%26app%3D3030%26f%3DPNG%3Fw%3D200%26h%3D133%26s%3D58E3895447F1AFC80CF28F830300E08F&refer=http%3A%2F%2Fwww.baidu.com&app=2021&size=f242,150&n=0&g=0n&q=100&fmt=auto?sec=1714323600&t=114f966340173d4db494c9f3d349748a",
+    img: "img.png",
     event: '',
     render: (data) => <img src={data.img}
                            style={{
